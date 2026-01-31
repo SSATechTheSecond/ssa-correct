@@ -358,11 +358,18 @@ function Invoke-SsaExchangeGui {
       $script:QueueState.Items = @($mailboxes | ForEach-Object {
         $mbx = $_.Mailbox
         $stats = $_.Stats
+        $sizeBytes = $_.SizeBytes
+
+        # Convert size to GB for display
+        $sizeGB = if ($sizeBytes -gt 0) {
+          [math]::Round($sizeBytes / 1GB, 2)
+        } else { 0 }
 
         [PSCustomObject]@{
           PrimarySmtp = $mbx.PrimarySmtpAddress
           DisplayName = $mbx.DisplayName
           MailboxType = $mbx.RecipientTypeDetails
+          MailboxSizeGB = $sizeGB
           HasArchive = if ($mbx.ArchiveGuid -and $mbx.ArchiveGuid -ne [Guid]::Empty) { 'Yes' } else { 'No' }
           LastLogon = if ($stats.LastLogonTime) { $stats.LastLogonTime.ToString('yyyy-MM-dd') } else { '' }
           Status = 'NotStarted'

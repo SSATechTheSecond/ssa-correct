@@ -136,14 +136,18 @@
                               AutoGenerateColumns="False"
                               CanUserAddRows="False"
                               SelectionMode="Extended"
-                              Margin="0,10,0,0">
+                              Margin="0,10,0,0"
+                              AlternatingRowBackground="#F5F5F5"
+                              GridLinesVisibility="Horizontal"
+                              HeadersVisibility="Column">
                         <DataGrid.Columns>
-                            <DataGridTextColumn Header="Primary SMTP" Binding="{Binding PrimarySmtp}" Width="*" MinWidth="200"/>
-                            <DataGridTextColumn Header="Display Name" Binding="{Binding DisplayName}" Width="*" MinWidth="150"/>
-                            <DataGridTextColumn Header="Type" Binding="{Binding MailboxType}" Width="100"/>
-                            <DataGridTextColumn Header="Archive" Binding="{Binding HasArchive}" Width="70"/>
-                            <DataGridTextColumn Header="Last Logon" Binding="{Binding LastLogon}" Width="100"/>
-                            <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="100"/>
+                            <DataGridTextColumn Header="Primary SMTP" Binding="{Binding PrimarySmtp}" Width="200"/>
+                            <DataGridTextColumn Header="Display Name" Binding="{Binding DisplayName}" Width="150"/>
+                            <DataGridTextColumn Header="Type" Binding="{Binding MailboxType}" Width="90"/>
+                            <DataGridTextColumn Header="Size (GB)" Binding="{Binding MailboxSizeGB}" Width="80"/>
+                            <DataGridTextColumn Header="Archive" Binding="{Binding HasArchive}" Width="60"/>
+                            <DataGridTextColumn Header="Last Logon" Binding="{Binding LastLogon}" Width="90"/>
+                            <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="90"/>
                             <DataGridTextColumn Header="Error" Binding="{Binding Error}" Width="*" MinWidth="100"/>
                         </DataGrid.Columns>
                     </DataGrid>
