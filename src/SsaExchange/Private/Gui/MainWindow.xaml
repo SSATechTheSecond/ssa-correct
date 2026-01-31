@@ -1,0 +1,213 @@
+<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="SSA Correct - Bulk Export Workbench"
+        Height="700" Width="1200"
+        MinHeight="600" MinWidth="1000"
+        WindowStartupLocation="CenterScreen">
+
+    <Window.Resources>
+        <!-- Styles -->
+        <Style x:Key="StatusLight" TargetType="Ellipse">
+            <Setter Property="Width" Value="12"/>
+            <Setter Property="Height" Value="12"/>
+            <Setter Property="Margin" Value="0,0,5,0"/>
+        </Style>
+
+        <Style x:Key="SectionHeader" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Margin" Value="0,10,0,5"/>
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Top Bar: Connection Status & Controls -->
+        <Border Grid.Row="0" BorderBrush="#DDD" BorderThickness="0,0,0,1" Padding="0,0,0,10">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Connection Status -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal">
+                    <TextBlock Text="Connection Status:" FontWeight="Bold" Margin="0,0,15,0" VerticalAlignment="Center"/>
+
+                    <StackPanel Orientation="Horizontal" Margin="0,0,15,0">
+                        <Ellipse x:Name="ExoStatusLight" Style="{StaticResource StatusLight}" Fill="Gray"/>
+                        <TextBlock x:Name="ExoStatusText" Text="Exchange Online: Disconnected" VerticalAlignment="Center"/>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal" Margin="0,0,15,0">
+                        <Ellipse x:Name="ComplianceStatusLight" Style="{StaticResource StatusLight}" Fill="Gray"/>
+                        <TextBlock x:Name="ComplianceStatusText" Text="Compliance: Disconnected" VerticalAlignment="Center"/>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal">
+                        <Ellipse x:Name="GraphStatusLight" Style="{StaticResource StatusLight}" Fill="Gray"/>
+                        <TextBlock x:Name="GraphStatusText" Text="Graph: Disconnected" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </StackPanel>
+
+                <!-- Connect/Disconnect Buttons -->
+                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                    <Button x:Name="ConnectButton" Content="Connect" Width="100" Height="30" Margin="0,0,10,0"/>
+                    <Button x:Name="DisconnectButton" Content="Disconnect" Width="100" Height="30" IsEnabled="False"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Main Content Area -->
+        <Grid Grid.Row="1" Margin="0,10,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="300" MinWidth="250"/>
+                <ColumnDefinition Width="5"/>
+                <ColumnDefinition Width="*" MinWidth="400"/>
+                <ColumnDefinition Width="5"/>
+                <ColumnDefinition Width="250" MinWidth="200"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Left Panel: Queue Builder -->
+            <Border Grid.Column="0" BorderBrush="#DDD" BorderThickness="1" Padding="10">
+                <StackPanel>
+                    <TextBlock Style="{StaticResource SectionHeader}" Text="Build Queue"/>
+
+                    <TextBlock Text="Mailbox Scope:" Margin="0,10,0,5"/>
+                    <ComboBox x:Name="MailboxScopeCombo" SelectedIndex="0">
+                        <ComboBoxItem Content="User + Shared (exclude Room/Equipment)" ToolTip="Most common export scope. Excludes resource mailboxes to reduce noise."/>
+                        <ComboBoxItem Content="User only" ToolTip="Only user mailboxes (normal employee accounts)."/>
+                        <ComboBoxItem Content="Shared only" ToolTip="Shared mailboxes (often used for former employees or departments)."/>
+                        <ComboBoxItem Content="All mailbox types" ToolTip="Includes Room/Equipment and other types. Use only if you know you need them."/>
+                    </ComboBox>
+
+                    <TextBlock Style="{StaticResource SectionHeader}" Text="Load Strategy"/>
+                    <RadioButton x:Name="InactiveOnlyRadio" Content="Inactive only (recommended)" IsChecked="True" Margin="0,5,0,5"
+                                 ToolTip="Build queue using inactivity rules to avoid loading all mailboxes in large tenants."/>
+
+                    <StackPanel Margin="20,0,0,0">
+                        <TextBlock Text="Inactive threshold (days):" Margin="0,5,0,5"/>
+                        <ComboBox x:Name="InactiveThresholdCombo" SelectedIndex="2">
+                            <ComboBoxItem Content="30 days"/>
+                            <ComboBoxItem Content="90 days"/>
+                            <ComboBoxItem Content="180 days"/>
+                            <ComboBoxItem Content="365 days"/>
+                        </ComboBox>
+
+                        <CheckBox x:Name="IncludeBlanksCheckbox" Content="Include blanks (never/unknown)" IsChecked="True" Margin="0,5,0,0"
+                                  ToolTip="Include mailboxes where last logon is empty/unknown—common for accounts that never logged in or data not available."/>
+                    </StackPanel>
+
+                    <RadioButton x:Name="LoadAllRadio" Content="Load everything (may be slow)" Margin="0,5,0,5"
+                                 ToolTip="Loads all matching mailboxes and then you filter/sort in the grid. Can be heavy in large tenants (11k+)."/>
+
+                    <CheckBox x:Name="IncludeArchiveCheckbox" Content="Include archive info (slower)" IsChecked="True" Margin="0,15,0,0"
+                              ToolTip="Adds whether an archive exists. Slightly slower but helps decide 'Both' exports."/>
+
+                    <Button x:Name="BuildQueueButton" Content="Build Queue" Height="35" Margin="0,20,0,0" IsEnabled="False"/>
+                    <Button x:Name="PreviewCountButton" Content="Preview Count" Height="30" Margin="0,5,0,0" IsEnabled="False"/>
+                </StackPanel>
+            </Border>
+
+            <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" Background="#EEE"/>
+
+            <!-- Center: Queue Grid -->
+            <Border Grid.Column="2" BorderBrush="#DDD" BorderThickness="1" Padding="10">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0" Style="{StaticResource SectionHeader}" Text="Export Queue"/>
+
+                    <DataGrid Grid.Row="1" x:Name="QueueDataGrid"
+                              AutoGenerateColumns="False"
+                              CanUserAddRows="False"
+                              SelectionMode="Extended"
+                              Margin="0,10,0,0">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Primary SMTP" Binding="{Binding PrimarySmtp}" Width="*" MinWidth="200"/>
+                            <DataGridTextColumn Header="Display Name" Binding="{Binding DisplayName}" Width="*" MinWidth="150"/>
+                            <DataGridTextColumn Header="Type" Binding="{Binding MailboxType}" Width="100"/>
+                            <DataGridTextColumn Header="Archive" Binding="{Binding HasArchive}" Width="70"/>
+                            <DataGridTextColumn Header="Last Logon" Binding="{Binding LastLogon}" Width="100"/>
+                            <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="100"/>
+                            <DataGridTextColumn Header="Error" Binding="{Binding Error}" Width="*" MinWidth="100"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </Border>
+
+            <GridSplitter Grid.Column="3" Width="5" HorizontalAlignment="Stretch" Background="#EEE"/>
+
+            <!-- Right Panel: Run Controls -->
+            <Border Grid.Column="4" BorderBrush="#DDD" BorderThickness="1" Padding="10">
+                <StackPanel>
+                    <TextBlock Style="{StaticResource SectionHeader}" Text="Run Controls"/>
+
+                    <TextBlock Text="Case Name:" Margin="0,10,0,5"/>
+                    <TextBox x:Name="CaseNameTextbox" ToolTip="Auto-generated per run; editable before start"/>
+
+                    <TextBlock Text="Export Type Default:" Margin="0,10,0,5"/>
+                    <ComboBox x:Name="ExportTypeCombo" SelectedIndex="2">
+                        <ComboBoxItem Content="Primary only"/>
+                        <ComboBoxItem Content="Archive only"/>
+                        <ComboBoxItem Content="Both"/>
+                    </ComboBox>
+
+                    <TextBlock Text="Max Concurrency:" Margin="0,10,0,5"/>
+                    <ComboBox x:Name="ConcurrencyCombo" SelectedIndex="1">
+                        <ComboBoxItem Content="2"/>
+                        <ComboBoxItem Content="3"/>
+                        <ComboBoxItem Content="4"/>
+                        <ComboBoxItem Content="5"/>
+                    </ComboBox>
+
+                    <TextBlock Text="Poll Interval (seconds):" Margin="0,10,0,5"/>
+                    <ComboBox x:Name="PollIntervalCombo" SelectedIndex="1">
+                        <ComboBoxItem Content="15"/>
+                        <ComboBoxItem Content="30"/>
+                        <ComboBoxItem Content="60"/>
+                    </ComboBox>
+
+                    <Separator Margin="0,15,0,15"/>
+
+                    <CheckBox x:Name="UnattendedModeCheckbox" Content="Run unattended (job continues when Windows is locked)"
+                              Margin="0,0,0,10"
+                              ToolTip="When enabled, locking Windows will not stop the job. Use with caution."/>
+
+                    <Button x:Name="LockWindowsButton" Content="Lock Windows" Height="35" Margin="0,0,0,10" IsEnabled="False"/>
+
+                    <Separator Margin="0,5,0,15"/>
+
+                    <Button x:Name="StartButton" Content="Start" Height="35" Margin="0,0,0,5" IsEnabled="False"/>
+                    <Button x:Name="PauseButton" Content="Pause" Height="30" Margin="0,0,0,5" IsEnabled="False"/>
+                    <Button x:Name="ResumeButton" Content="Resume" Height="30" Margin="0,0,0,5" IsEnabled="False"/>
+                    <Button x:Name="RetryFailedButton" Content="Retry Failed" Height="30" Margin="0,0,0,10" IsEnabled="False"/>
+
+                    <Button x:Name="OpenRunFolderButton" Content="Open Run Folder" Height="30" Margin="0,0,0,5" IsEnabled="False"/>
+                    <Button x:Name="ExportSummaryButton" Content="Export Summary CSV" Height="30" IsEnabled="False"/>
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <!-- Bottom Status Bar -->
+        <Border Grid.Row="2" BorderBrush="#DDD" BorderThickness="0,1,0,0" Padding="0,10,0,0" Margin="0,10,0,0">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock x:Name="StatusBarText" Grid.Column="0" Text="Ready" VerticalAlignment="Center"/>
+                <TextBlock x:Name="QueueStatsText" Grid.Column="1" Text="Queue: 0 total, 0 completed, 0 failed" VerticalAlignment="Center"/>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

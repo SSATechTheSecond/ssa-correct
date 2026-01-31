@@ -9,6 +9,7 @@
   PowerShellVersion = '5.1'
   FunctionsToExport = @(
     'Invoke-SsaExchangeApp',
+    'Invoke-SsaExchangeGui',
     'Connect-SsaM365',
     'Disconnect-SsaM365',
     'Invoke-SsaUserResetPassword',
