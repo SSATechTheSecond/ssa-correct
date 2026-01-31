@@ -164,8 +164,15 @@ function Invoke-SsaExchangeGui {
       $controls['ConnectButton'].IsEnabled = $false
       Update-StatusBar "Connecting to Exchange Online..."
 
+      # Minimize window so browser auth popup is visible
+      $window.WindowState = [System.Windows.WindowState]::Minimized
+
       # Call the actual Connect-SsaM365 function
       Connect-SsaM365 -AdminUpn $adminUPN
+
+      # Restore window after connection
+      $window.WindowState = [System.Windows.WindowState]::Normal
+      $window.Activate()
 
       # Get session state to check what connected
       $session = Get-SsaSession
