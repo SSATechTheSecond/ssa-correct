@@ -19,18 +19,16 @@
 - [x] Fix Ui.ps1 encoding issues (curly quotes)
 
 ### High Priority (In Progress)
+- [ ] **PERFORMANCE**: Implement background runspaces for mailbox queries (UI freezes for 10+ mins currently)
 - [ ] Implement queue engine with controlled concurrency (2-4 concurrent searches)
-- [ ] Connect GUI to actual EXO cmdlets (Connect-SsaM365)
-- [ ] Implement actual mailbox query logic for each load strategy
-- [ ] Add LastMailboxLogonTime retrieval from EXO
-- [ ] Add mailbox size retrieval for Top 10 strategies
+- [ ] Add progress updates during query execution (currently just indeterminate bar)
 
 ### Medium Priority
 - [ ] Create per-run project folder structure with state persistence
 - [ ] Add Exclude/Remove functionality with audit notes in queue grid
 - [ ] Implement resumable queue from saved state (queue.json)
 - [ ] Create event logging system (events.jsonl)
-- [ ] Implement background job processing with runspaces
+- [ ] Optimize "Inactive" and "LoadAll" queries to include mailbox size without extra Get-MailboxStatistics calls
 
 ### Low Priority
 - [ ] Add bulk actions (Set ExportType for selected)
