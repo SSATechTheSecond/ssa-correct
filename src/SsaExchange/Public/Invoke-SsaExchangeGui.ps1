@@ -197,32 +197,117 @@ function Invoke-SsaExchangeGui {
     Update-StatusBar "Building queue from Exchange Online..."
 
     try {
-      # TODO: Implement queue building logic
-      # For now, add sample data
-      $script:QueueState.Items = @(
-        [PSCustomObject]@{
-          PrimarySmtp = 'user1@contoso.com'
-          DisplayName = 'User One'
-          MailboxType = 'UserMailbox'
-          HasArchive = 'Yes'
-          LastLogon = '2025-12-01'
-          Status = 'NotStarted'
-          Error = ''
-        },
-        [PSCustomObject]@{
-          PrimarySmtp = 'shared@contoso.com'
-          DisplayName = 'Shared Mailbox'
-          MailboxType = 'SharedMailbox'
-          HasArchive = 'No'
-          LastLogon = ''
-          Status = 'NotStarted'
-          Error = ''
+      # Determine which load strategy is selected
+      $loadStrategy = 'Inactive'
+      if ($controls['Top10MailboxSizeRadio'].IsChecked) {
+        $loadStrategy = 'Top10Mailbox'
+      }
+      elseif ($controls['Top10ArchiveSizeRadio'].IsChecked) {
+        $loadStrategy = 'Top10Archive'
+      }
+      elseif ($controls['LoadAllRadio'].IsChecked) {
+        $loadStrategy = 'LoadAll'
+      }
+
+      # TODO: Implement actual EXO query logic based on load strategy
+      # For now, add sample data based on strategy
+      switch ($loadStrategy) {
+        'Top10Mailbox' {
+          Update-StatusBar "Loading top 10 mailboxes by size..."
+          $script:QueueState.Items = @(
+            [PSCustomObject]@{
+              PrimarySmtp = 'large1@contoso.com'
+              DisplayName = 'Large Mailbox 1'
+              MailboxType = 'UserMailbox'
+              HasArchive = 'Yes'
+              LastLogon = '2026-01-15'
+              Status = 'NotStarted'
+              Error = ''
+            },
+            [PSCustomObject]@{
+              PrimarySmtp = 'large2@contoso.com'
+              DisplayName = 'Large Mailbox 2'
+              MailboxType = 'UserMailbox'
+              HasArchive = 'Yes'
+              LastLogon = '2026-01-10'
+              Status = 'NotStarted'
+              Error = ''
+            }
+          )
         }
-      )
+        'Top10Archive' {
+          Update-StatusBar "Loading top 10 archives by size..."
+          $script:QueueState.Items = @(
+            [PSCustomObject]@{
+              PrimarySmtp = 'archive1@contoso.com'
+              DisplayName = 'Large Archive 1'
+              MailboxType = 'UserMailbox'
+              HasArchive = 'Yes'
+              LastLogon = '2026-01-20'
+              Status = 'NotStarted'
+              Error = ''
+            },
+            [PSCustomObject]@{
+              PrimarySmtp = 'archive2@contoso.com'
+              DisplayName = 'Large Archive 2'
+              MailboxType = 'UserMailbox'
+              HasArchive = 'Yes'
+              LastLogon = '2026-01-18'
+              Status = 'NotStarted'
+              Error = ''
+            }
+          )
+        }
+        'LoadAll' {
+          Update-StatusBar "Loading all mailboxes (this may take a while)..."
+          $script:QueueState.Items = @(
+            [PSCustomObject]@{
+              PrimarySmtp = 'all1@contoso.com'
+              DisplayName = 'All Users 1'
+              MailboxType = 'UserMailbox'
+              HasArchive = 'No'
+              LastLogon = '2026-01-25'
+              Status = 'NotStarted'
+              Error = ''
+            }
+          )
+        }
+        default {
+          # Inactive only
+          $thresholdDays = switch ($controls['InactiveThresholdCombo'].SelectedIndex) {
+            0 { 30 }
+            1 { 90 }
+            2 { 180 }
+            3 { 365 }
+            default { 180 }
+          }
+          Update-StatusBar "Loading inactive mailboxes (older than $thresholdDays days)..."
+          $script:QueueState.Items = @(
+            [PSCustomObject]@{
+              PrimarySmtp = 'inactive1@contoso.com'
+              DisplayName = 'Inactive User 1'
+              MailboxType = 'SharedMailbox'
+              HasArchive = 'No'
+              LastLogon = '2025-06-01'
+              Status = 'NotStarted'
+              Error = ''
+            },
+            [PSCustomObject]@{
+              PrimarySmtp = 'inactive2@contoso.com'
+              DisplayName = 'Inactive User 2'
+              MailboxType = 'UserMailbox'
+              HasArchive = 'Yes'
+              LastLogon = ''
+              Status = 'NotStarted'
+              Error = ''
+            }
+          )
+        }
+      }
 
       $controls['QueueDataGrid'].ItemsSource = $script:QueueState.Items
       Update-QueueStats
-      Update-StatusBar "Queue built: $($script:QueueState.Items.Count) mailboxes"
+      Update-StatusBar "Queue built: $($script:QueueState.Items.Count) mailboxes using strategy '$loadStrategy'"
 
       $controls['StartButton'].IsEnabled = $true
     }

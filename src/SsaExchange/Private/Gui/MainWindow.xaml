@@ -103,6 +103,12 @@
                                   ToolTip="Include mailboxes where last logon is empty/unknown—common for accounts that never logged in or data not available."/>
                     </StackPanel>
 
+                    <RadioButton x:Name="Top10MailboxSizeRadio" Content="Top 10 by mailbox size" Margin="0,5,0,5"
+                                 ToolTip="Load the 10 largest mailboxes by primary mailbox size. Quick way to target large exports."/>
+
+                    <RadioButton x:Name="Top10ArchiveSizeRadio" Content="Top 10 by archive size" Margin="0,5,0,5"
+                                 ToolTip="Load the 10 largest archives by archive size. Useful for targeting large archive exports."/>
+
                     <RadioButton x:Name="LoadAllRadio" Content="Load everything (may be slow)" Margin="0,5,0,5"
                                  ToolTip="Loads all matching mailboxes and then you filter/sort in the grid. Can be heavy in large tenants (11k+)."/>
 

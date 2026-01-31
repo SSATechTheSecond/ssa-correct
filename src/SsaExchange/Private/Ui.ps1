@@ -3,7 +3,7 @@ function Write-SsaGreeting {
   param()
 
   Write-Host ''
-  Write-Host 'Hello — I hope you enjoy this free software built by Lourens. Thank you for using it.'
+  Write-Host 'Hello - I hope you enjoy this free software built by Lourens. Thank you for using it.'
   Write-Host ''
   Write-Host 'Quick terms (so prompts make sense):'
   Write-Host "- Admin UPN: your admin sign-in, usually looks like an email (e.g. admin@contoso.com)."
@@ -12,7 +12,7 @@ function Write-SsaGreeting {
   Write-Host "- Purview Compliance Search: the app creates a search; you then export PST in the Purview portal."
   Write-Host ''
   Write-Host 'Notes:'
-  Write-Host "- If a prompt asks for a mailbox, prefer entering a UPN/email — not a GUID."
+  Write-Host "- If a prompt asks for a mailbox, prefer entering a UPN/email - not a GUID."
   Write-Host "- Logs and export job folders are created under the Export Root you choose at startup."
   Write-Host ''
 }
