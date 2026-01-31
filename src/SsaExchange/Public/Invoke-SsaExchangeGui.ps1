@@ -149,8 +149,8 @@ function Invoke-SsaExchangeGui {
     Update-StatusBar "Connecting to Microsoft 365 services..."
 
     try {
-      # TODO: Call Connect-SsaM365 or implement connection logic
-      # For now, simulate connection
+      # Prompt for admin UPN
+      Add-Type -AssemblyName Microsoft.VisualBasic
       $adminUPN = [Microsoft.VisualBasic.Interaction]::InputBox("Enter your admin UPN:", "Connect to M365", "")
 
       if ([string]::IsNullOrWhiteSpace($adminUPN)) {
@@ -160,16 +160,30 @@ function Invoke-SsaExchangeGui {
 
       $script:ConnectionState.AdminUPN = $adminUPN
 
-      # Simulate connections (replace with actual Connect-SsaM365 call)
-      Update-ConnectionStatus -Service 'Exo' -Connected $true
-      Update-ConnectionStatus -Service 'Compliance' -Connected $true
-      Update-ConnectionStatus -Service 'Graph' -Connected $true
+      # Disable Connect button during connection
+      $controls['ConnectButton'].IsEnabled = $false
+      Update-StatusBar "Connecting to Exchange Online..."
+
+      # Call the actual Connect-SsaM365 function
+      Connect-SsaM365 -AdminUpn $adminUPN
+
+      # Get session state to check what connected
+      $session = Get-SsaSession
+
+      # Update status indicators based on actual connection state
+      Update-ConnectionStatus -Service 'Exo' -Connected $session.Connected.ExchangeOnline
+      Update-ConnectionStatus -Service 'Compliance' -Connected $session.Connected.Compliance
+      Update-ConnectionStatus -Service 'Graph' -Connected $session.Connected.Graph
 
       Update-StatusBar "Connected as: $adminUPN"
+
+      # Re-enable Connect button
+      $controls['ConnectButton'].IsEnabled = $true
     }
     catch {
       [System.Windows.MessageBox]::Show("Connection failed: $($_.Exception.Message)", "Error", [System.Windows.MessageBoxButton]::OK, [System.Windows.MessageBoxImage]::Error)
       Update-StatusBar "Connection failed"
+      $controls['ConnectButton'].IsEnabled = $true
     }
   })
 
@@ -178,8 +192,10 @@ function Invoke-SsaExchangeGui {
     Update-StatusBar "Disconnecting..."
 
     try {
-      # TODO: Call Disconnect-SsaM365 or implement disconnection logic
+      # Call the actual Disconnect-SsaM365 function
+      Disconnect-SsaM365
 
+      # Update UI to reflect disconnected state
       Update-ConnectionStatus -Service 'Exo' -Connected $false
       Update-ConnectionStatus -Service 'Compliance' -Connected $false
       Update-ConnectionStatus -Service 'Graph' -Connected $false
@@ -209,69 +225,89 @@ function Invoke-SsaExchangeGui {
         $loadStrategy = 'LoadAll'
       }
 
-      # TODO: Implement actual EXO query logic based on load strategy
-      # For now, add sample data based on strategy
+      # Get mailbox scope filter
+      $scopeIndex = $controls['MailboxScopeCombo'].SelectedIndex
+      $recipientTypeFilter = switch ($scopeIndex) {
+        0 { @('UserMailbox', 'SharedMailbox') } # User + Shared
+        1 { @('UserMailbox') } # User only
+        2 { @('SharedMailbox') } # Shared only
+        default { $null } # All types
+      }
+
+      # Query mailboxes based on load strategy
+      $mailboxes = @()
+
       switch ($loadStrategy) {
         'Top10Mailbox' {
           Update-StatusBar "Loading top 10 mailboxes by size..."
-          $script:QueueState.Items = @(
+
+          # Get all mailboxes with filter
+          if ($recipientTypeFilter) {
+            $allMbx = Get-Mailbox -ResultSize Unlimited | Where-Object { $recipientTypeFilter -contains $_.RecipientTypeDetails }
+          }
+          else {
+            $allMbx = Get-Mailbox -ResultSize Unlimited
+          }
+
+          # Get statistics and sort by TotalItemSize
+          $mailboxes = $allMbx | ForEach-Object {
+            $stats = Get-MailboxStatistics -Identity $_.PrimarySmtpAddress -ErrorAction SilentlyContinue
             [PSCustomObject]@{
-              PrimarySmtp = 'large1@contoso.com'
-              DisplayName = 'Large Mailbox 1'
-              MailboxType = 'UserMailbox'
-              HasArchive = 'Yes'
-              LastLogon = '2026-01-15'
-              Status = 'NotStarted'
-              Error = ''
-            },
-            [PSCustomObject]@{
-              PrimarySmtp = 'large2@contoso.com'
-              DisplayName = 'Large Mailbox 2'
-              MailboxType = 'UserMailbox'
-              HasArchive = 'Yes'
-              LastLogon = '2026-01-10'
-              Status = 'NotStarted'
-              Error = ''
+              Mailbox = $_
+              Stats = $stats
+              SizeBytes = if ($stats.TotalItemSize) {
+                [long]($stats.TotalItemSize.ToString() -replace '.*\(([0-9,]+).*', '$1' -replace ',', '')
+              } else { 0 }
             }
-          )
+          } | Sort-Object -Property SizeBytes -Descending | Select-Object -First 10
         }
+
         'Top10Archive' {
           Update-StatusBar "Loading top 10 archives by size..."
-          $script:QueueState.Items = @(
+
+          # Get mailboxes with archives
+          if ($recipientTypeFilter) {
+            $allMbx = Get-Mailbox -ResultSize Unlimited -Archive | Where-Object { $recipientTypeFilter -contains $_.RecipientTypeDetails }
+          }
+          else {
+            $allMbx = Get-Mailbox -ResultSize Unlimited -Archive
+          }
+
+          # Get archive statistics and sort
+          $mailboxes = $allMbx | Where-Object { $_.ArchiveGuid -ne [Guid]::Empty } | ForEach-Object {
+            $stats = Get-MailboxStatistics -Identity $_.PrimarySmtpAddress -Archive -ErrorAction SilentlyContinue
             [PSCustomObject]@{
-              PrimarySmtp = 'archive1@contoso.com'
-              DisplayName = 'Large Archive 1'
-              MailboxType = 'UserMailbox'
-              HasArchive = 'Yes'
-              LastLogon = '2026-01-20'
-              Status = 'NotStarted'
-              Error = ''
-            },
-            [PSCustomObject]@{
-              PrimarySmtp = 'archive2@contoso.com'
-              DisplayName = 'Large Archive 2'
-              MailboxType = 'UserMailbox'
-              HasArchive = 'Yes'
-              LastLogon = '2026-01-18'
-              Status = 'NotStarted'
-              Error = ''
+              Mailbox = $_
+              Stats = $stats
+              SizeBytes = if ($stats.TotalItemSize) {
+                [long]($stats.TotalItemSize.ToString() -replace '.*\(([0-9,]+).*', '$1' -replace ',', '')
+              } else { 0 }
             }
-          )
+          } | Sort-Object -Property SizeBytes -Descending | Select-Object -First 10
         }
+
         'LoadAll' {
           Update-StatusBar "Loading all mailboxes (this may take a while)..."
-          $script:QueueState.Items = @(
+
+          # Get all mailboxes
+          if ($recipientTypeFilter) {
+            $allMbx = Get-Mailbox -ResultSize Unlimited | Where-Object { $recipientTypeFilter -contains $_.RecipientTypeDetails }
+          }
+          else {
+            $allMbx = Get-Mailbox -ResultSize Unlimited
+          }
+
+          # Get basic stats for each
+          $mailboxes = $allMbx | ForEach-Object {
+            $stats = Get-MailboxStatistics -Identity $_.PrimarySmtpAddress -ErrorAction SilentlyContinue
             [PSCustomObject]@{
-              PrimarySmtp = 'all1@contoso.com'
-              DisplayName = 'All Users 1'
-              MailboxType = 'UserMailbox'
-              HasArchive = 'No'
-              LastLogon = '2026-01-25'
-              Status = 'NotStarted'
-              Error = ''
+              Mailbox = $_
+              Stats = $stats
+              SizeBytes = 0
             }
-          )
+          }
         }
+
         default {
           # Inactive only
           $thresholdDays = switch ($controls['InactiveThresholdCombo'].SelectedIndex) {
@@ -281,29 +317,51 @@ function Invoke-SsaExchangeGui {
             3 { 365 }
             default { 180 }
           }
+          $thresholdDate = (Get-Date).AddDays(-$thresholdDays)
+          $includeBlanks = $controls['IncludeBlanksCheckbox'].IsChecked
+
           Update-StatusBar "Loading inactive mailboxes (older than $thresholdDays days)..."
-          $script:QueueState.Items = @(
-            [PSCustomObject]@{
-              PrimarySmtp = 'inactive1@contoso.com'
-              DisplayName = 'Inactive User 1'
-              MailboxType = 'SharedMailbox'
-              HasArchive = 'No'
-              LastLogon = '2025-06-01'
-              Status = 'NotStarted'
-              Error = ''
-            },
-            [PSCustomObject]@{
-              PrimarySmtp = 'inactive2@contoso.com'
-              DisplayName = 'Inactive User 2'
-              MailboxType = 'UserMailbox'
-              HasArchive = 'Yes'
-              LastLogon = ''
-              Status = 'NotStarted'
-              Error = ''
+
+          # Get mailboxes
+          if ($recipientTypeFilter) {
+            $allMbx = Get-Mailbox -ResultSize Unlimited | Where-Object { $recipientTypeFilter -contains $_.RecipientTypeDetails }
+          }
+          else {
+            $allMbx = Get-Mailbox -ResultSize Unlimited
+          }
+
+          # Filter by last logon time
+          $mailboxes = $allMbx | ForEach-Object {
+            $stats = Get-MailboxStatistics -Identity $_.PrimarySmtpAddress -ErrorAction SilentlyContinue
+            $lastLogon = $stats.LastLogonTime
+
+            # Include if: no last logon (and blanks enabled) OR last logon older than threshold
+            if ((-not $lastLogon -and $includeBlanks) -or ($lastLogon -and $lastLogon -lt $thresholdDate)) {
+              [PSCustomObject]@{
+                Mailbox = $_
+                Stats = $stats
+                SizeBytes = 0
+              }
             }
-          )
+          } | Where-Object { $_ -ne $null }
         }
       }
+
+      # Convert to queue items
+      $script:QueueState.Items = @($mailboxes | ForEach-Object {
+        $mbx = $_.Mailbox
+        $stats = $_.Stats
+
+        [PSCustomObject]@{
+          PrimarySmtp = $mbx.PrimarySmtpAddress
+          DisplayName = $mbx.DisplayName
+          MailboxType = $mbx.RecipientTypeDetails
+          HasArchive = if ($mbx.ArchiveGuid -and $mbx.ArchiveGuid -ne [Guid]::Empty) { 'Yes' } else { 'No' }
+          LastLogon = if ($stats.LastLogonTime) { $stats.LastLogonTime.ToString('yyyy-MM-dd') } else { '' }
+          Status = 'NotStarted'
+          Error = ''
+        }
+      })
 
       $controls['QueueDataGrid'].ItemsSource = $script:QueueState.Items
       Update-QueueStats
