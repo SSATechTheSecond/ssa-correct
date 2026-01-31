@@ -35,11 +35,20 @@ Built for administrators managing large Microsoft 365 tenants (tested with 11k+ 
 - Mailbox delegation (EXO): FullAccess, SendAs, SendOnBehalf, Calendar permissions
 - Compliance export jobs (Purview): Create PST export searches with portal instructions
 
-### Coming Soon (GUI v1)
-- WPF-based Bulk Export Workbench
-- Visual queue management with real-time status
-- Connection status indicators (EXO/Compliance/Graph)
-- Progress tracking and retry controls
+### GUI v1 (Available Now - Alpha)
+- **WPF-based Bulk Export Workbench** with professional layout
+- **Connection status indicators** with visual lights (EXO/Compliance/Graph)
+- **Multiple load strategies**:
+  - Inactive only (with customizable threshold: 30/90/180/365 days)
+  - Top 10 by mailbox size
+  - Top 10 by archive size
+  - Load everything (all mailboxes)
+- **Queue management grid** with multi-select support
+- **Run controls**: Start, Pause, Resume, Retry Failed
+- **Unattended mode toggle** with Windows lock integration
+- **Export type selection**: Primary/Archive/Both
+- **Concurrency control**: 2-5 concurrent operations
+- **Tooltips** on all controls for guidance
 
 ## Prerequisites
 
@@ -86,10 +95,17 @@ cd ssa-correct
 
 ## Usage
 
-### GUI Mode (v1 - In Development)
+### GUI Mode (v1 - Alpha - Available Now!)
 ```powershell
 .\Run-Gui.ps1
 ```
+
+The GUI will launch the Bulk Export Workbench with:
+- Connection management (click "Connect" to authenticate)
+- Load strategy selection (choose from 4 options)
+- Queue building from Exchange Online
+- Visual progress tracking
+- Unattended mode with lock integration
 
 ### CLI Mode (Current)
 ```powershell
@@ -229,19 +245,26 @@ Please see TODO.md for current development priorities.
 
 ## Roadmap
 
-### v0.1.0 (Current - CLI)
+### v0.1.0 (Current - CLI + GUI Alpha)
 - ✅ User management (Graph)
 - ✅ Mailbox delegation (EXO)
 - ✅ PST export search creation (Purview)
 - ✅ Project-based run folders
 - ✅ Session logging
+- ✅ WPF GUI foundation with Bulk Export Workbench
+- ✅ Connection status indicators
+- ✅ Queue grid with multi-select
+- ✅ Multiple load strategies (Inactive/Top 10 Mailbox/Top 10 Archive/All)
+- ✅ Unattended mode with Windows lock integration
+- ✅ Run controls (Start/Pause/Resume/Retry)
 
-### v1.0.0 (In Development - GUI)
-- ⏳ WPF Bulk Export Workbench
-- ⏳ Queue management with multi-select
-- ⏳ Controlled concurrency engine
-- ⏳ Unattended mode with lock integration
-- ⏳ Real-time status and progress tracking
+### v1.0.0 (In Progress - GUI Production)
+- ⏳ Connect GUI to actual EXO/Graph cmdlets
+- ⏳ Implement real mailbox queries for each load strategy
+- ⏳ Controlled concurrency queue engine
+- ⏳ Background job processing with runspaces
+- ⏳ Per-run project folders from GUI
+- ⏳ Resumable queue state persistence
 
 ### v1.1.0+ (Future)
 - 📋 User management GUI tab

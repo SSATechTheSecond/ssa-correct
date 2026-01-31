@@ -2,26 +2,35 @@
 
 ## Current Sprint - Foundation & GUI Development
 
-### High Priority
-- [ ] Implement WPF GUI for Bulk Export Workbench
-  - [ ] Connection management UI (EXO/Compliance/Graph status indicators)
-  - [ ] Build Queue panel with mailbox selection
-  - [ ] Queue grid with multi-select support
-  - [ ] Run controls (Start/Pause/Resume/Retry)
-  - [ ] Unattended mode toggle + Lock Windows button
-- [ ] Create Invoke-SsaExchangeGui.ps1 entry point
+### Completed ✅
+- [x] Implement WPF GUI for Bulk Export Workbench
+  - [x] Connection management UI (EXO/Compliance/Graph status indicators)
+  - [x] Build Queue panel with mailbox selection
+  - [x] Queue grid with multi-select support
+  - [x] Run controls (Start/Pause/Resume/Retry)
+  - [x] Unattended mode toggle + Lock Windows button
+- [x] Create Invoke-SsaExchangeGui.ps1 entry point
+- [x] Add "Run unattended" mode with explicit toggle
+- [x] Implement Windows lock integration (LockWorkStation API)
+- [x] Implement mailbox filtering (Inactive/User/Shared/Both)
+- [x] Add tooltips for all UI controls
+- [x] Add Top 10 by mailbox size load strategy
+- [x] Add Top 10 by archive size load strategy
+- [x] Fix Ui.ps1 encoding issues (curly quotes)
+
+### High Priority (In Progress)
 - [ ] Implement queue engine with controlled concurrency (2-4 concurrent searches)
-- [ ] Add "Run unattended" mode with explicit toggle
-- [ ] Implement Windows lock integration (LockWorkStation API)
+- [ ] Connect GUI to actual EXO cmdlets (Connect-SsaM365)
+- [ ] Implement actual mailbox query logic for each load strategy
+- [ ] Add LastMailboxLogonTime retrieval from EXO
+- [ ] Add mailbox size retrieval for Top 10 strategies
 
 ### Medium Priority
-- [ ] Add LastMailboxLogonTime retrieval from EXO
-- [ ] Implement mailbox filtering (Inactive/User/Shared/Both)
 - [ ] Create per-run project folder structure with state persistence
 - [ ] Add Exclude/Remove functionality with audit notes in queue grid
 - [ ] Implement resumable queue from saved state (queue.json)
-- [ ] Add tooltips for all UI controls
 - [ ] Create event logging system (events.jsonl)
+- [ ] Implement background job processing with runspaces
 
 ### Low Priority
 - [ ] Add bulk actions (Set ExportType for selected)
