@@ -61,7 +61,7 @@ Install-Module Microsoft.Graph -Scope CurrentUser
 ## Installation
 
 ### Option 1: Download Release (Recommended for controlled environments)
-1. Download the latest release zip from [GitHub Releases](https://github.com/<YOUR-USER>/ssa-correct/releases)
+1. Download the latest release zip from [GitHub Releases](https://github.com/SSATechTheSecond/ssa-correct/releases)
 2. Extract to a local folder
 3. Unblock files if needed:
    ```powershell
@@ -74,12 +74,12 @@ Install-Module Microsoft.Graph -Scope CurrentUser
 
 ### Option 2: Paste into PowerShell (Quick start - coming soon)
 ```powershell
-iwr -useb https://raw.githubusercontent.com/<YOUR-USER>/ssa-correct/main/bootstrap.ps1 | iex
+iwr -useb https://raw.githubusercontent.com/SSATechTheSecond/ssa-correct/main/bootstrap.ps1 | iex
 ```
 
 ### Option 3: Clone and Run (Development)
 ```powershell
-git clone https://github.com/<YOUR-USER>/ssa-correct.git
+git clone https://github.com/SSATechTheSecond/ssa-correct.git
 cd ssa-correct
 .\Run-Gui.ps1
 ```
