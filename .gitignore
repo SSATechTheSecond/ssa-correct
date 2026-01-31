@@ -1,0 +1,63 @@
+# Build outputs
+dist/
+*.zip
+
+# Logs
+*.log
+*.tmp
+
+# IDE and editor files
+.idea/
+.vscode/
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# PowerShell temporary files
+*.ps1~
+
+# Windows thumbnail cache
+Thumbs.db
+ehthumbs.db
+
+# Folder config file
+Desktop.ini
+
+# Recycle Bin
+$RECYCLE.BIN/
+
+# Mac files
+.DS_Store
+
+# Node modules (if any future web components)
+node_modules/
+
+# Test results
+TestResults/
+*.trx
+
+# Coverage reports
+coverage/
+*.coverage
+
+# Sensitive data
+*.pfx
+*.p12
+*.key
+*.pem
+credentials.json
+.env
+secrets/
+
+# Export and run data (user-specific, should not be committed)
+Exports/
+ExportRoot/
+Runs/
+Run_*/
+
+# Large assets that don't belong in version control
+*.pst
+*.ost
+*.bak
