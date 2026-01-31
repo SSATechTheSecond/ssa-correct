@@ -219,6 +219,12 @@ function Invoke-SsaExchangeGui {
   $controls['BuildQueueButton'].Add_Click({
     Update-StatusBar "Building queue from Exchange Online..."
 
+    # Show progress bar and disable Build button
+    $controls['ProgressBar'].Visibility = [System.Windows.Visibility]::Visible
+    $controls['ProgressBar'].IsIndeterminate = $true
+    $controls['BuildQueueButton'].IsEnabled = $false
+    $window.Cursor = [System.Windows.Input.Cursors]::Wait
+
     try {
       # Determine which load strategy is selected
       $loadStrategy = 'Inactive'
@@ -386,6 +392,13 @@ function Invoke-SsaExchangeGui {
     catch {
       [System.Windows.MessageBox]::Show("Failed to build queue: $($_.Exception.Message)", "Error", [System.Windows.MessageBoxButton]::OK, [System.Windows.MessageBoxImage]::Error)
       Update-StatusBar "Failed to build queue"
+    }
+    finally {
+      # Hide progress bar and restore UI
+      $controls['ProgressBar'].Visibility = [System.Windows.Visibility]::Collapsed
+      $controls['ProgressBar'].IsIndeterminate = $false
+      $controls['BuildQueueButton'].IsEnabled = $true
+      $window.Cursor = [System.Windows.Input.Cursors]::Arrow
     }
   })
 
