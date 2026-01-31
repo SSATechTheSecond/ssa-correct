@@ -225,18 +225,17 @@ function Invoke-SsaExchangeGui {
     $controls['BuildQueueButton'].IsEnabled = $false
     $window.Cursor = [System.Windows.Input.Cursors]::Wait
 
-    try {
-      # Determine which load strategy is selected
-      $loadStrategy = 'Inactive'
-      if ($controls['Top10MailboxSizeRadio'].IsChecked) {
-        $loadStrategy = 'Top10Mailbox'
-      }
-      elseif ($controls['Top10ArchiveSizeRadio'].IsChecked) {
-        $loadStrategy = 'Top10Archive'
-      }
-      elseif ($controls['LoadAllRadio'].IsChecked) {
-        $loadStrategy = 'LoadAll'
-      }
+    # Determine which load strategy is selected
+    $loadStrategy = 'Inactive'
+    if ($controls['Top10MailboxSizeRadio'].IsChecked) {
+      $loadStrategy = 'Top10Mailbox'
+    }
+    elseif ($controls['Top10ArchiveSizeRadio'].IsChecked) {
+      $loadStrategy = 'Top10Archive'
+    }
+    elseif ($controls['LoadAllRadio'].IsChecked) {
+      $loadStrategy = 'LoadAll'
+    }
 
       # Get mailbox scope filter
       $scopeIndex = $controls['MailboxScopeCombo'].SelectedIndex
